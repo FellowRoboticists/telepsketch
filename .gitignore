@@ -1,0 +1,8 @@
+# vim files
+*.swp
+
+# ino files
+.build
+
+# npm files
+node_modules
