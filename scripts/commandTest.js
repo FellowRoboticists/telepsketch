@@ -2,6 +2,7 @@
 
 const readline = require('readline');
 const SerialPort = require('serialport').SerialPort;
+const parser = require('./packet-parser');
 
 const DRIVE = 0x89;
 const SERIAL_PORT = '/dev/ttyACM0';
@@ -20,7 +21,35 @@ const sendCommand = (speed, angle) => {
 
 serial.on('data', (data) => {
   // console.log("There's data!!");
-  console.log(data.toString('utf8'));
+  // This was if the Arduino was sending text back
+  // console.log(data.toString('utf8'));
+  var currPkt = parser.parse(data);
+  if (currPkt) {
+    var idx = 2;  // Start after the LEN byte
+    while (idx < currPkt.length - 1) { // skip chksum
+      switch (currPkt[idx]) {
+        case 0x01:
+          value = (currPkt[idx+1] << 8) | currPkt[idx+2];
+          console.log("Proximity: %d", value);
+          idx += 3;
+          break;
+        case 0x02:
+          value = (currPkt[idx+1] << 8) | currPkt[idx+2];
+          console.log("Humidity: %d", value);
+          idx += 3;
+          break;
+        case 0x03:
+          value = (currPkt[idx+1] << 8) | currPkt[idx+2];
+          console.log("Temperature: %d", value);
+          idx += 3;
+          break;
+        default:
+          console.log("Didn't recognize the sensor");
+          break;
+      }
+    }
+    parser.reset();
+  }
 });
 
 serial.on('close', (err) => {
