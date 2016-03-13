@@ -5,10 +5,15 @@ const SerialPort = require('serialport').SerialPort;
 const parser = require('./packet-parser');
 
 const DRIVE = 0x89;
-const SERIAL_PORT = '/dev/ttyACM0';
+// When hooked through the level converter, this is the
+// serial port tty
+const SERIAL_PORT = '/dev/ttyAMA0';
+// When hooked through the USB, this is the serial port
+// tty
+//const SERIAL_PORT = '/dev/ttyACM0';
 
-var serial = new SerialPort(SERIAL_PORT, { baudrate: 57600 });
-// var serial = new SerialPort(SERIAL_PORT, { baudrate: 9600 });
+// var serial = new SerialPort(SERIAL_PORT, { baudrate: 57600 });
+var serial = new SerialPort(SERIAL_PORT, { baudrate: 9600 });
 
 const uB = (word) => word >> 8;
 
@@ -81,19 +86,19 @@ rl.on('line', (answer) => {
   switch (answer) {
     case 'forward':
       console.log("Drive forward");
-      sendCommand(10, 0);
+      sendCommand(70, 0);
       break;
     case 'backward':
       console.log("Drive backward");
-      sendCommand(-10, 0);
+      sendCommand(-70, 0);
       break;
     case 'left':
       console.log("Rotate left");
-      sendCommand(10, 1);
+      sendCommand(70, 1);
       break;
     case 'right':
       console.log("Rotate right");
-      sendCommand(-10, 1);
+      sendCommand(-70, 1);
       break;
     case 'stop':
       console.log("Stop");
