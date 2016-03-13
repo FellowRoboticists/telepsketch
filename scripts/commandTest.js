@@ -1,74 +1,53 @@
 #!/usr/bin/env node
 
 const readline = require('readline');
-const SerialPort = require('serialport').SerialPort;
-const parser = require('./packet-parser');
+const RobotSerialInterface = require('robot-serial-iface').RobotSerialInterface;
 
 const DRIVE = 0x89;
 // When hooked through the level converter, this is the
 // serial port tty
-const SERIAL_PORT = '/dev/ttyAMA0';
+// const SERIAL_PORT = '/dev/ttyAMA0';
 // When hooked through the USB, this is the serial port
 // tty
-//const SERIAL_PORT = '/dev/ttyACM0';
+const SERIAL_PORT = '/dev/ttyACM0';
+const SERIAL_OPTIONS = { baudrate: 57600 };
+const SENSORS = [
+  {
+    name: 'temperature',
+    startByte: 0x03,
+    numBytes: 2
+  },
+  {
+    name: 'humidity',
+    startByte: 0x02,
+    numBytes: 2
+  }
+];
 
-// var serial = new SerialPort(SERIAL_PORT, { baudrate: 57600 });
-var serial = new SerialPort(SERIAL_PORT, { baudrate: 9600 });
+var robot = new RobotSerialInterface();
+
+// Start the interface...
+robot.start(SERIAL_PORT, SERIAL_OPTIONS, SENSORS);
+
+robot.on('temperature', function(temp) {
+  console.log("Temperature: %d", temp);
+});
+
+robot.on('humidity', function(hum) {
+  console.log("Humidity: %d", hum);
+});
 
 const uB = (word) => word >> 8;
 
 const lB = (word) => word & 0x000000ff;
 
 const sendCommand = (speed, angle) => {
-  serial.write(new Buffer([DRIVE, uB(speed), lB(speed), uB(angle), lB(angle)]));
-  // serial.flush();
+  robot.sendCommand(DRIVE, [uB(speed), lB(speed), uB(angle), lB(angle)]);
 };
 
-serial.on('data', (data) => {
-  // console.log("There's data!!");
-  // This was if the Arduino was sending text back
-  // console.log(data.toString('utf8'));
-  var currPkt = parser.parse(data);
-  if (currPkt) {
-    var idx = 2;  // Start after the LEN byte
-    while (idx < currPkt.length - 1) { // skip chksum
-      switch (currPkt[idx]) {
-        case 0x01:
-          value = (currPkt[idx+1] << 8) | currPkt[idx+2];
-          console.log("Proximity: %d", value);
-          idx += 3;
-          break;
-        case 0x02:
-          value = (currPkt[idx+1] << 8) | currPkt[idx+2];
-          console.log("Humidity: %d", value);
-          idx += 3;
-          break;
-        case 0x03:
-          value = (currPkt[idx+1] << 8) | currPkt[idx+2];
-          console.log("Temperature: %d", value);
-          idx += 3;
-          break;
-        default:
-          console.log("Didn't recognize the sensor");
-          break;
-      }
-    }
-    parser.reset();
-  }
-});
-
-serial.on('close', (err) => {
-  console.log('Serial port closed');
-});
-
-serial.on('error', (err) => {
-  console.log('Error on serial port: %j', err);
-});
-
-serial.on('open', () => {
-  console.log('Serial port opened successfully');
-});
-
+// #################################################
+// Read commands from the command line from the user
+//
 const rl = readline.createInterface( {
   input: process.stdin,
   output: process.stdout

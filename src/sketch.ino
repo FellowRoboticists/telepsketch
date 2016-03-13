@@ -25,7 +25,6 @@ uint8_t sensorPacket [SENSOR_PACKET_LENGTH];
 #define ALT_SENSOR_PACKET_LENGTH 9
 uint8_t altSensorPacket [ALT_SENSOR_PACKET_LENGTH];
 
-#define PROXIMITY_SENSOR 0x01
 #define HUMIDITY_SENSOR 0x02
 #define TEMPERATURE_SENSOR 0x03
 
@@ -56,9 +55,6 @@ void loop()
   float t = dht.readTemperature();
 
   float tf = t * 1.8 + 32; // Convert fromn C to F
-
-  // Send a sensor packet value
-  sendSensorValue(PROXIMITY_SENSOR, 300);
 
   sendTempHumidValues(h, tf);
 
@@ -148,20 +144,3 @@ void sendTempHumidValues(uint16_t humidity, uint16_t temperature) {
   Serial.write(altSensorPacket, ALT_SENSOR_PACKET_LENGTH);
 }
 
-void sendSensorValue(uint16_t sensor, uint16_t value) {
-  sensorPacket[0] = START_BYTE;
-  sensorPacket[1] = 0x03;
-  sensorPacket[2] = PROXIMITY_SENSOR;
-  sensorPacket[3] = value >> 8;
-  sensorPacket[4] = value & 0x00ff;
-
-  // Calculate the checksum for the packet
-  int total = 0;
-  for (int i=0; i<SENSOR_PACKET_LENGTH - 1; i++) {
-    total += sensorPacket[i];
-  }
-
-  sensorPacket[5] = -total; // Checksum
-
-  Serial.write(sensorPacket, SENSOR_PACKET_LENGTH);
-}
