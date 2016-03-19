@@ -6,11 +6,11 @@ const RobotSerialInterface = require('robot-serial-iface').RobotSerialInterface;
 const DRIVE = 0x89;
 // When hooked through the level converter, this is the
 // serial port tty
-// const SERIAL_PORT = '/dev/ttyAMA0';
+const SERIAL_PORT = '/dev/ttyAMA0';
 // When hooked through the USB, this is the serial port
 // tty
-const SERIAL_PORT = '/dev/ttyACM0';
-const SERIAL_OPTIONS = { baudrate: 57600 };
+// const SERIAL_PORT = '/dev/ttyACM0';
+const SERIAL_OPTIONS = { baudrate: 9600 };
 const SENSORS = [
   {
     name: 'temperature',
