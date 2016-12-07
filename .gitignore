@@ -10,3 +10,4 @@ node_modules
 # Any sym-links
 scripts/packet-parser.js
 lib/DHT
+lib/TelepPacket
