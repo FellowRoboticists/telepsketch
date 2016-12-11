@@ -1,4 +1,5 @@
 #include <Packet.h>
+#include <CommandPacket.h>
 // #include "DHT.h"
 
 #define SERIAL_BAUD_RATE 9600
@@ -20,9 +21,9 @@
 // The sensor output looks like:
 // START_BYTE LEN_BYTE SENSOR_TYPE SENSOR_VALUE1 [SENSOR_VALUE2] [SENSOR_TYPE...]* CHECKSUM
 
-Packet inboundPkt;
+CommandPacket inboundPkt(DRIVE, 5);
 Packet outboundPkt;
-uint8_t commandPacket [COMMAND_PACKET_LENGTH];
+// uint8_t commandPacket [COMMAND_PACKET_LENGTH];
 int currentPacketLength = 0;
 
 //#define SENSOR_PACKET_LENGTH 6
@@ -68,6 +69,12 @@ void loop()
 }
 
 void serialEvent() {
+  if (CommandPacket::read(Serial, inboundPkt)) {
+    processCompletePacket();
+  } else {
+    // This was a bad or incomplete packet. Moving on.
+    inboundPkt.reset();
+  }
   //if (Packet::read(Serial, inboundPkt)) {
     //// If it returns true, we have a complete and valid packet ready to go.
     //processCompletePacket();
@@ -78,33 +85,33 @@ void serialEvent() {
     //// badPacket();
   //}
 
-  while (Serial.available()) {
-    uint8_t b = Serial.read();
-    if (currentPacketLength == 0) {
+  //while (Serial.available()) {
+    //uint8_t b = Serial.read();
+    //if (currentPacketLength == 0) {
 
-      if (b == DRIVE) {
-        // This is a valid command
-        commandPacket[currentPacketLength++] = b;
-      } // else skip reading until we get a valid command
+      //if (b == DRIVE) {
+        //// This is a valid command
+        //commandPacket[currentPacketLength++] = b;
+      //} // else skip reading until we get a valid command
 
-    } else if (currentPacketLength >= COMMAND_PACKET_LENGTH) {
+    //} else if (currentPacketLength >= COMMAND_PACKET_LENGTH) {
 
-      // We have a complete packet; parse out the speed and
-      // direction
-      processCompletePacket();
+      //// We have a complete packet; parse out the speed and
+      //// direction
+      //processCompletePacket();
 
-      // Clear the packet for the next command
-      currentPacketLength = 0;
+      //// Clear the packet for the next command
+      //currentPacketLength = 0;
 
-    } else {
-      // The packet's not full and we're collecting goodies
-      commandPacket[currentPacketLength++] = b;
-    }
-  }
-  if (currentPacketLength >= COMMAND_PACKET_LENGTH) {
-    processCompletePacket();
-    currentPacketLength = 0;
-  }
+    //} else {
+      //// The packet's not full and we're collecting goodies
+      //commandPacket[currentPacketLength++] = b;
+    //}
+  //}
+  //if (currentPacketLength >= COMMAND_PACKET_LENGTH) {
+    //processCompletePacket();
+    //currentPacketLength = 0;
+  //}
 }
 
 void badPacket() {
@@ -130,15 +137,15 @@ void badCommand() {
 }
 
 void processCompletePacket() {
-  uint8_t cmd = commandPacket[0]; // inboundPkt.nextValue(1); // What's the command?
-  if (cmd != DRIVE) {
-    // Invalid command
-    badCommand();
-    return;
-  }
+  //uint8_t cmd = commandPacket[0]; // inboundPkt.nextValue(1); // What's the command?
+  //if (cmd != DRIVE) {
+    //// Invalid command
+    //badCommand();
+    //return;
+  //}
 
-  int speed = (int) (commandPacket[1] << 8 | commandPacket[2]);
-  uint16_t direction = commandPacket[3] << 8 | commandPacket[4];
+  int speed = (int) inboundPkt.nextValue(2); // (commandPacket[1] << 8 | commandPacket[2]);
+  uint16_t direction = inboundPkt.nextValue(2); // commandPacket[3] << 8 | commandPacket[4];
 
   ledsOff();
 
