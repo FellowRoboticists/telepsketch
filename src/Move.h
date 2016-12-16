@@ -64,6 +64,16 @@ class Move {
   void rotate(int angle);
 
   /**
+   * Spin robot to the left
+   */
+  void spinLeft();
+
+  /**
+   * Spin robot to the right
+   */
+  void spinRight();
+
+  /**
      Stop the motors.
   */
   void stop();

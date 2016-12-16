@@ -238,6 +238,7 @@ void processCompletePacket() {
 
   int speed = (int) inboundPkt.nextValue(2); // (commandPacket[1] << 8 | commandPacket[2]);
   uint16_t direction = inboundPkt.nextValue(2); // commandPacket[3] << 8 | commandPacket[4];
+  inboundPkt.reset();
 
 #ifdef STUB_MINION
 
@@ -272,14 +273,14 @@ void processCompletePacket() {
     if (direction == 0) {
       mover.forward();
     } else {
-      mover.left();
+      mover.spinLeft();
     }
   } else if (speed < 0) {
     mover.setSpeed(abs(speed));
     if (direction == 0) {
       mover.backward();
     } else {
-      mover.right();
+      mover.spinRight();
     }
   } else {
     // Speed is 0; just stop

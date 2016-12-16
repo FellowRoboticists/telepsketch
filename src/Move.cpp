@@ -80,6 +80,16 @@ void Move::backward() {
   motorReverse(MOTOR_RIGHT, speed);  
 }
 
+void Move::spinLeft() {
+  motorReverse(MOTOR_LEFT,  speed); 
+  motorForward(MOTOR_RIGHT, speed);  
+}
+
+void Move::spinRight() {
+  motorForward(MOTOR_LEFT,  speed); 
+  motorReverse(MOTOR_RIGHT, speed);  
+}
+
 void Move::rotate(int angle) {
   changeMoveState(MOV_ROTATE);
 
