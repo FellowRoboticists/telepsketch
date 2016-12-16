@@ -21,6 +21,11 @@ const SENSORS = [
     name: 'humidity',
     startByte: 0x02,
     numBytes: 2
+  },
+  {
+    name: 'proximity',
+    startByte: 0x02,
+    numBytes: 2
   }
 ]
 
@@ -35,6 +40,10 @@ robot.on('temperature', function (temp) {
 
 robot.on('humidity', function (hum) {
   console.log('Humidity: %d', hum)
+})
+
+robot.on('proximity', function (speed) {
+  console.log('Proximity: %d', speed)
 })
 
 const uB = (word) => word >> 8
