@@ -10,3 +10,8 @@ node_modules
 # Any sym-links
 scripts/packet-parser.js
 lib/DHT
+lib/TelepPacket
+lib/AFMotor
+lib/pspc_support
+lib/RobotMotor
+lib/SoftServo
